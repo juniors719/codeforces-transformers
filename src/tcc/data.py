@@ -294,6 +294,48 @@ def verify_no_leakage(train_df: pd.DataFrame, val_df: pd.DataFrame, test_df: pd.
                 )
 
 
+_SAVED_SPLIT_COLUMNS = [
+    "id",
+    "aliases",
+    "contest_start_year",
+    "title",
+    "description",
+    "input_format",
+    "rating",
+    "rating_num",
+    "difficulty_class",
+    "tags",
+    "clean_tags",
+    "alias_group_id",
+    "hf_split",
+]
+
+_JSON_LIST_COLUMNS = ("aliases", "tags", "clean_tags")
+
+
+def _serialize_split_for_parquet(df: pd.DataFrame) -> pd.DataFrame:
+    """Seleciona apenas colunas necessárias e serializa listas como JSON para compatibilidade PyArrow."""
+    cols = [c for c in _SAVED_SPLIT_COLUMNS if c in df.columns]
+    out = df[cols].copy()
+    for col in _JSON_LIST_COLUMNS:
+        if col in out.columns:
+            out[col] = out[col].map(
+                lambda v: json.dumps(list(v) if isinstance(v, (list, tuple, set, np.ndarray)) else ([] if v is None or (isinstance(v, float) and np.isnan(v)) else [v]), ensure_ascii=False)
+            )
+    return out
+
+
+def _read_split_parquet(path: Path) -> pd.DataFrame:
+    """Lê um Parquet salvo e restaura colunas de lista serializadas em JSON."""
+    df = pd.read_parquet(path)
+    for col in _JSON_LIST_COLUMNS:
+        if col in df.columns:
+            df[col] = df[col].map(
+                lambda v: json.loads(v) if isinstance(v, str) else (list(v) if isinstance(v, (list, tuple, np.ndarray)) else [])
+            )
+    return df
+
+
 def load_or_prepare_splits(cfg: dict[str, Any], force_rebuild: bool = False) -> dict[str, Any]:
     """Carrega partições salvas em splits_dir ou baixa open-r1/codeforces e gera tudo de forma determinística."""
     splits_dir = Path(cfg["paths"]["splits_dir"])
@@ -306,18 +348,21 @@ def load_or_prepare_splits(cfg: dict[str, Any], force_rebuild: bool = False) -> 
     tag_freq_path = splits_dir / "train_tag_frequencies.csv"
 
     if not force_rebuild and all(p.exists() for p in (train_path, val_path, test_path, meta_path, tag_freq_path)):
-        with meta_path.open("r", encoding="utf-8") as f:
-            meta = json.load(f)
-        return {
-            "train": pd.read_parquet(train_path),
-            "val": pd.read_parquet(val_path),
-            "test": pd.read_parquet(test_path),
-            "tag_vocab": meta["tag_vocab"],
-            "train_tag_freq": pd.read_csv(tag_freq_path),
-            "filter_steps": meta["filter_steps"],
-            "alias_report": meta["alias_report"],
-            "year_summary": meta["year_summary"],
-        }
+        try:
+            with meta_path.open("r", encoding="utf-8") as f:
+                meta = json.load(f)
+            return {
+                "train": _read_split_parquet(train_path),
+                "val": _read_split_parquet(val_path),
+                "test": _read_split_parquet(test_path),
+                "tag_vocab": meta["tag_vocab"],
+                "train_tag_freq": pd.read_csv(tag_freq_path),
+                "filter_steps": meta["filter_steps"],
+                "alias_report": meta["alias_report"],
+                "year_summary": meta["year_summary"],
+            }
+        except Exception as exc:
+            print(f"[AVISO] Falha ao ler splits em cache ({type(exc).__name__}: {exc}). Reconstruindo...")
 
     from datasets import load_dataset
 
@@ -333,9 +378,9 @@ def load_or_prepare_splits(cfg: dict[str, Any], force_rebuild: bool = False) -> 
     bundle = prepare_splits_from_dataframes(raw_train_df, raw_test_df, cfg)
 
     # Persiste partições fixas para reutilização por todos os modelos e seeds
-    bundle["train"].to_parquet(train_path, index=False)
-    bundle["val"].to_parquet(val_path, index=False)
-    bundle["test"].to_parquet(test_path, index=False)
+    _serialize_split_for_parquet(bundle["train"]).to_parquet(train_path, index=False)
+    _serialize_split_for_parquet(bundle["val"]).to_parquet(val_path, index=False)
+    _serialize_split_for_parquet(bundle["test"]).to_parquet(test_path, index=False)
     bundle["train_tag_freq"].to_csv(tag_freq_path, index=False)
 
     meta = {
