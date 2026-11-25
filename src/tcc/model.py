@@ -121,7 +121,6 @@ class MultiTaskTransformer(nn.Module):
         attn_map = model_spec.get("attention_type_by_length", {}) or {}
         attn_type = attn_map.get(max_length) or attn_map.get(str(max_length))
         if attn_type:
-            extra_kwargs["attention_type"] = attn_type
             meta["attention_type"] = attn_type
 
         hf_config = AutoConfig.from_pretrained(hf_name, cache_dir=cache_dir)
