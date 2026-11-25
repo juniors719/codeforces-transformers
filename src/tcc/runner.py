@@ -4,9 +4,14 @@ from __future__ import annotations
 
 import argparse
 import gc
+import os
 import time
 from pathlib import Path
 from typing import Any
+
+os.environ.setdefault("USE_TF", "0")
+os.environ.setdefault("TRANSFORMERS_NO_TF", "1")
+os.environ.setdefault("USE_TORCH", "1")
 
 import torch
 
