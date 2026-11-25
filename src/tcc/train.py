@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import math
+import tempfile
 import time
 from pathlib import Path
 from typing import Any
@@ -112,8 +113,12 @@ def resolve_amp_config(mixed_precision: str, device: torch.device) -> tuple[str,
         return "fp32", None, False
 
     mode = (mixed_precision or "auto").lower()
+    major_cc = torch.cuda.get_device_capability(device)[0]
+    has_hw_bf16 = major_cc >= 8 and torch.cuda.is_bf16_supported()
+
     if mode == "auto":
-        if torch.cuda.is_bf16_supported():
+        # T4 (cc 7.5) não possui Tensor Cores para bf16; usar fp16 evita fallback lento.
+        if has_hw_bf16:
             return "bf16", torch.bfloat16, False
         return "fp16", torch.float16, True
     if mode == "bf16":
@@ -332,7 +337,19 @@ def run_single_experiment(
     scheduler = get_linear_schedule_with_warmup(optimizer, warmup_steps, total_steps)
     scaler = torch.amp.GradScaler("cuda", enabled=use_scaler)
 
-    best_ckpt_path = run_dir / "best_checkpoint.pt"
+    keep_ckpt = bool(train_cfg.get("keep_checkpoint", False))
+    if keep_ckpt:
+        best_ckpt_path = run_dir / "best_checkpoint.pt"
+    else:
+        tmp_ckpt_dir = Path(tempfile.gettempdir()) / "tcc_checkpoints"
+        tmp_ckpt_dir.mkdir(parents=True, exist_ok=True)
+        best_ckpt_path = tmp_ckpt_dir / f"{run_dir.name}_best.pt"
+
+    print(
+        f"  [{run_dir.name}] device={device} ({torch.cuda.get_device_name(device) if device.type == 'cuda' else 'CPU'}), "
+        f"amp={amp_mode}, bs={per_device_bs}x{grad_accum}, batches/época={len(train_loader)}",
+        flush=True,
+    )
     best_val_loss = float("inf")
     best_epoch = 0
     epochs_no_improve = 0
