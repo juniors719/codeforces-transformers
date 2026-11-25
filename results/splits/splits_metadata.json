@@ -1,0 +1,147 @@
+{
+  "tag_vocab": [
+    "2-sat",
+    "binary search",
+    "bitmasks",
+    "brute force",
+    "chinese remainder theorem",
+    "combinatorics",
+    "constructive algorithms",
+    "data structures",
+    "dfs and similar",
+    "divide and conquer",
+    "dp",
+    "dsu",
+    "expression parsing",
+    "fft",
+    "flows",
+    "games",
+    "geometry",
+    "graph matchings",
+    "graphs",
+    "greedy",
+    "hashing",
+    "implementation",
+    "interactive",
+    "math",
+    "matrices",
+    "meet-in-the-middle",
+    "number theory",
+    "probabilities",
+    "schedules",
+    "shortest paths",
+    "sortings",
+    "string suffix structures",
+    "strings",
+    "ternary search",
+    "trees",
+    "two pointers"
+  ],
+  "filter_steps": [
+    {
+      "step": "0_raw_dataset",
+      "total": 10024,
+      "hf_train": 9556,
+      "hf_test": 468
+    },
+    {
+      "step": "1_valid_rating",
+      "total": 9767,
+      "hf_train": 9309,
+      "hf_test": 458
+    },
+    {
+      "step": "2_valid_tags",
+      "total": 9508,
+      "hf_train": 9055,
+      "hf_test": 453
+    },
+    {
+      "step": "3_nonempty_description",
+      "total": 9493,
+      "hf_train": 9040,
+      "hf_test": 453
+    },
+    {
+      "step": "4_remove_train_aliases_in_test",
+      "total": 9493,
+      "hf_train": 9040,
+      "hf_test": 453
+    },
+    {
+      "step": "5_dedup_aliases_first_by_id",
+      "total": 9493,
+      "hf_train": 9040,
+      "hf_test": 453
+    },
+    {
+      "step": "6_nonempty_after_cleaning",
+      "total": 9493,
+      "hf_train": 9040,
+      "hf_test": 453
+    }
+  ],
+  "alias_report": {
+    "total_multi_member_groups": 0,
+    "groups_with_conflicting_rating": 0,
+    "groups_with_conflicting_tags": 0,
+    "groups_spanning_train_and_test": 0,
+    "rows_removed_train_aliases_in_test": 0,
+    "rows_removed_intra_split_dedup": 0
+  },
+  "year_summary": {
+    "train": {
+      "count": 8136,
+      "min_year": 2010,
+      "max_year": 2024,
+      "year_counts": {
+        "2010": 246,
+        "2011": 353,
+        "2012": 401,
+        "2013": 395,
+        "2014": 375,
+        "2015": 371,
+        "2016": 522,
+        "2017": 611,
+        "2018": 694,
+        "2019": 812,
+        "2020": 777,
+        "2021": 697,
+        "2022": 737,
+        "2023": 730,
+        "2024": 415
+      }
+    },
+    "val": {
+      "count": 904,
+      "min_year": 2010,
+      "max_year": 2024,
+      "year_counts": {
+        "2010": 22,
+        "2011": 32,
+        "2012": 47,
+        "2013": 51,
+        "2014": 35,
+        "2015": 41,
+        "2016": 49,
+        "2017": 62,
+        "2018": 81,
+        "2019": 87,
+        "2020": 95,
+        "2021": 81,
+        "2022": 73,
+        "2023": 96,
+        "2024": 52
+      }
+    },
+    "test": {
+      "count": 453,
+      "min_year": 2024,
+      "max_year": 2025,
+      "year_counts": {
+        "2024": 372,
+        "2025": 81
+      }
+    }
+  }
+}
