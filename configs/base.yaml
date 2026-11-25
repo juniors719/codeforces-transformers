@@ -49,7 +49,7 @@ tokenization:
   fields: ["title", "description", "input_format"]
   # Estratégias suportadas: "right", "head_tail", "reserve_input_format"
   truncation_strategy: "reserve_input_format"
-  reserve_input_format_tokens: 128
+  reserve_input_format_tokens: 224
   head_tail_head_tokens: 128
 
 model:
