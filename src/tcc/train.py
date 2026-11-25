@@ -22,7 +22,7 @@ import numpy as np
 import pandas as pd
 import torch
 import yaml
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset, Sampler
 from transformers import AutoTokenizer, get_linear_schedule_with_warmup
 
 from tcc.evaluate import evaluate_predictions, tune_per_class_thresholds
@@ -80,6 +80,38 @@ class ProblemDataset(Dataset):
 
     def __getitem__(self, idx: int) -> dict[str, Any]:
         return self.samples[idx]
+
+
+class LengthGroupedBatchSampler(Sampler[list[int]]):
+    """Agrupa exemplos de comprimentos próximos em megabatches para minimizar padding sem perder aleatoriedade."""
+
+    def __init__(self, lengths: list[int], batch_size: int, seed: int, megabatch_mult: int = 50) -> None:
+        self.lengths = lengths
+        self.batch_size = batch_size
+        self.seed = seed
+        self.megabatch_size = max(batch_size * megabatch_mult, batch_size)
+        self.epoch = 0
+
+    def set_epoch(self, epoch: int) -> None:
+        self.epoch = epoch
+
+    def __len__(self) -> int:
+        return math.ceil(len(self.lengths) / self.batch_size)
+
+    def __iter__(self):
+        rng = np.random.default_rng(self.seed + self.epoch)
+        indices = rng.permutation(len(self.lengths)).tolist()
+
+        batches: list[list[int]] = []
+        for start in range(0, len(indices), self.megabatch_size):
+            mega = indices[start : start + self.megabatch_size]
+            mega.sort(key=lambda idx: self.lengths[idx], reverse=True)
+            for b_start in range(0, len(mega), self.batch_size):
+                batches.append(mega[b_start : b_start + self.batch_size])
+
+        batch_order = rng.permutation(len(batches)).tolist()
+        for b_idx in batch_order:
+            yield batches[b_idx]
 
 
 def make_collate_fn(pad_token_id: int):
@@ -275,17 +307,15 @@ def run_single_experiment(
 
     collate_fn = make_collate_fn(int(tokenizer.pad_token_id))
     num_workers = int(train_cfg.get("num_workers", 0))
-    generator = torch.Generator()
-    generator.manual_seed(seed)
+    train_lengths = [len(s["input_ids"]) for s in train_ds.samples]
+    train_batch_sampler = LengthGroupedBatchSampler(train_lengths, batch_size=per_device_bs, seed=seed)
 
     train_loader = DataLoader(
         train_ds,
-        batch_size=per_device_bs,
-        shuffle=True,
+        batch_sampler=train_batch_sampler,
         collate_fn=collate_fn,
         num_workers=num_workers,
         pin_memory=torch.cuda.is_available(),
-        generator=generator,
     )
     val_loader = DataLoader(
         val_ds,
@@ -330,7 +360,13 @@ def run_single_experiment(
     warmup_ratio = float(train_cfg.get("warmup_ratio", 0.1))
     max_grad_norm = float(train_cfg.get("max_grad_norm", 1.0))
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
+    if device.type == "cuda":
+        try:
+            optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay, fused=True)
+        except TypeError:
+            optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
+    else:
+        optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     steps_per_epoch = max(1, math.ceil(len(train_loader) / grad_accum))
     total_steps = steps_per_epoch * max_epochs
     warmup_steps = int(total_steps * warmup_ratio)
@@ -357,10 +393,11 @@ def run_single_experiment(
 
     for epoch in range(1, max_epochs + 1):
         ep_start = time.perf_counter()
+        train_batch_sampler.set_epoch(epoch)
         model.train()
         optimizer.zero_grad(set_to_none=True)
 
-        train_loss_sum = 0.0
+        train_loss_sum = torch.zeros((), device=device)
         train_count = 0
 
         for step_idx, batch in enumerate(train_loader, start=1):
@@ -384,7 +421,7 @@ def run_single_experiment(
             else:
                 loss.backward()
 
-            train_loss_sum += float(out["loss"].item()) * bsz
+            train_loss_sum += out["loss"].detach() * bsz
             train_count += bsz
 
             if step_idx % grad_accum == 0 or step_idx == len(train_loader):
@@ -409,7 +446,7 @@ def run_single_experiment(
         )
 
         ep_time = time.perf_counter() - ep_start
-        train_loss = train_loss_sum / max(train_count, 1)
+        train_loss = float(train_loss_sum.item()) / max(train_count, 1)
         val_loss = val_out["loss"]
 
         history_rows.append(

@@ -7,7 +7,7 @@ models:
     max_lengths: [512]
     learning_rate: 2.0e-5
     per_device_batch_size:
-      512: 16
+      512: 32
     gradient_checkpointing:
       512: false
     notes: "Baseline clássico de 512 tokens (uncased)."
@@ -18,7 +18,7 @@ models:
     max_lengths: [512]
     learning_rate: 2.0e-5
     per_device_batch_size:
-      512: 16
+      512: 32
     gradient_checkpointing:
       512: false
     notes: "Pré-treino otimizado em texto geral (512 tokens, BPE)."
@@ -29,7 +29,7 @@ models:
     max_lengths: [512]
     learning_rate: 2.0e-5
     per_device_batch_size:
-      512: 16
+      512: 32
     gradient_checkpointing:
       512: false
     notes: "Mesma arquitetura do RoBERTa-base, pré-treinado em código e linguagem natural."
@@ -40,8 +40,8 @@ models:
     max_lengths: [512, 2048]
     learning_rate: 2.0e-5
     per_device_batch_size:
-      512: 16
-      2048: 8
+      512: 32
+      2048: 16
     gradient_checkpointing:
       512: false
       2048: true
@@ -55,8 +55,8 @@ models:
     max_lengths: [512, 2048]
     learning_rate: 2.0e-5
     per_device_batch_size:
-      512: 16
-      2048: 8
+      512: 32
+      2048: 16
     gradient_checkpointing:
       512: false
       2048: true
