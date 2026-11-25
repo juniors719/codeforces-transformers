@@ -1,17 +1,46 @@
-# Dependências fixadas para reprodutibilidade dos experimentos no Google Colab e local.
+# Dependências fixadas para reprodutibilidade.
+# O Colab utiliza Python 3.11/3.12; localmente (Python 3.14) usamos wheels compatíveis via marcadores PEP 508.
 # Nota: ModernBERT exige transformers >= 4.48.0; BigBird exige sentencepiece.
-torch==2.5.1
-transformers==4.49.0
-datasets==3.3.2
-accelerate==1.4.0
-scikit-learn==1.6.1
-scipy==1.15.2
-pandas==2.2.3
-numpy==2.0.2
-pyarrow==19.0.0
-matplotlib==3.10.0
-PyYAML==6.0.2
-tqdm==4.67.1
+
+torch==2.5.1; python_version < "3.14"
+torch>=2.9.0; python_version >= "3.14"
+
+transformers==4.49.0; python_version < "3.14"
+transformers>=4.49.0; python_version >= "3.14"
+
+datasets==3.3.2; python_version < "3.14"
+datasets>=3.3.2; python_version >= "3.14"
+
+accelerate==1.4.0; python_version < "3.14"
+accelerate>=1.4.0; python_version >= "3.14"
+
+scikit-learn==1.6.1; python_version < "3.14"
+scikit-learn>=1.6.1; python_version >= "3.14"
+
+scipy==1.15.2; python_version < "3.14"
+scipy>=1.15.2; python_version >= "3.14"
+
+pandas==2.2.3; python_version < "3.14"
+pandas>=2.2.3; python_version >= "3.14"
+
+numpy==2.0.2; python_version < "3.14"
+numpy>=2.0.2; python_version >= "3.14"
+
+pyarrow==19.0.0; python_version < "3.14"
+pyarrow>=19.0.0; python_version >= "3.14"
+
+matplotlib==3.10.0; python_version < "3.14"
+matplotlib>=3.10.0; python_version >= "3.14"
+
+PyYAML==6.0.2; python_version < "3.14"
+PyYAML>=6.0.2; python_version >= "3.14"
+
+tqdm==4.67.1; python_version < "3.14"
+tqdm>=4.67.1; python_version >= "3.14"
+
 sentencepiece>=0.2.0,<0.3.0
-protobuf==5.29.3
-pytest==8.3.4
+protobuf==5.29.3; python_version < "3.14"
+protobuf>=5.29.3; python_version >= "3.14"
+
+pytest==8.3.4; python_version < "3.14"
+pytest>=8.3.4; python_version >= "3.14"
