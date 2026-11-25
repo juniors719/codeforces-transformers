@@ -1,0 +1,15 @@
+# Grade experimental principal do TCC (5 arquiteturas @ 512 + 2 longas @ 2048 × 10 seeds = 70 runs)
+experiment:
+  name: "main"
+  description: "Comparação principal de arquiteturas Transformer (MTL: tags + dificuldade)."
+  runs:
+    - model: "bert-base-uncased"
+      max_lengths: [512]
+    - model: "roberta-base"
+      max_lengths: [512]
+    - model: "codebert-base"
+      max_lengths: [512]
+    - model: "modernbert-base"
+      max_lengths: [512, 2048]
+    - model: "bigbird-roberta-base"
+      max_lengths: [512, 2048]

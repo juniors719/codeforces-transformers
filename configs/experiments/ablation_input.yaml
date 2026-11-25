@@ -1,0 +1,13 @@
+# Ablação de entrada: apenas title + description (equivalente ao texto original do TCC)
+experiment:
+  name: "ablation_input"
+  description: "Avalia impacto de remover input_format (restrições numéricas) da entrada."
+  runs:
+    - model: "roberta-base"
+      max_lengths: [512]
+    - model: "codebert-base"
+      max_lengths: [512]
+
+tokenization:
+  fields: ["title", "description"]
+  truncation_strategy: "right"

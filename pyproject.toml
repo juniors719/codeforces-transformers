@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tcc-transformers"
+version = "0.1.0"
+description = "Análise comparativa de arquiteturas baseadas em Transformers para classificação de dificuldade e tags em programação competitiva (TCC UFC Quixadá)."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.3.0",
+    "transformers>=4.48.0",
+    "datasets>=3.0.0",
+    "scikit-learn>=1.5.0",
+    "scipy>=1.13.0",
+    "pandas>=2.2.0",
+    "numpy>=1.26.0",
+    "matplotlib>=3.9.0",
+    "PyYAML>=6.0.1",
+    "tqdm>=4.66.0",
+    "sentencepiece>=0.2.0",
+    "protobuf>=4.25.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

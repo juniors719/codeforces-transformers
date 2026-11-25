@@ -1,0 +1,17 @@
+# Dependências fixadas para reprodutibilidade dos experimentos no Google Colab e local.
+# Nota: ModernBERT exige transformers >= 4.48.0; BigBird exige sentencepiece.
+torch==2.5.1
+transformers==4.49.0
+datasets==3.3.2
+accelerate==1.4.0
+scikit-learn==1.6.1
+scipy==1.15.2
+pandas==2.2.3
+numpy==2.0.2
+pyarrow==19.0.0
+matplotlib==3.10.0
+PyYAML==6.0.2
+tqdm==4.67.1
+sentencepiece==0.2.0
+protobuf==5.29.3
+pytest==8.3.4

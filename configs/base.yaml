@@ -1,0 +1,101 @@
+# Configuração base dos experimentos do TCC
+project:
+  name: "tcc2-transformers"
+  seed: 42
+  # Lista fixa de 10 seeds usada em todas as configurações da grade principal
+  seeds: [42, 43, 44, 45, 46, 47, 48, 49, 50, 51]
+
+paths:
+  # Todos os caminhos abaixo são relativos à raiz do projeto ou sobrescritos via TCC_RESULTS_DIR / CLI
+  cache_dir: "results/cache"
+  splits_dir: "results/splits"
+  results_dir: "results"
+  runs_dir: "results/runs"
+  tables_dir: "results/tables"
+  figures_dir: "results/figures"
+
+data:
+  dataset_name: "open-r1/codeforces"
+  subset: "default"
+  val_ratio: 0.10
+  split_seed: 42
+  test_min_year: 2024
+  # Estratégia de deduplicação por grupo de aliases após filtros de validade
+  dedup_strategy: "first_by_id"
+  # Se um grupo de aliases possuir membro no teste, remove os demais membros de treino/validação
+  drop_train_val_if_alias_in_test: true
+
+labels:
+  # Limites superiores inclusivos das 4 primeiras classes (classe 4 = > 2300, isto é, >= 2400)
+  rating_upper_bounds: [1100, 1500, 1900, 2300]
+  difficulty_names:
+    - "<=1100"
+    - "1200-1500"
+    - "1600-1900"
+    - "2000-2300"
+    - ">=2400"
+  exclude_tag_prefix: "*"
+  # Frequência mínima no treino (confirmada após inspeção na EDA)
+  min_tag_freq: 50
+
+cleaning:
+  remove_triple_dollar: true
+  convert_latex: true
+  strip_html: true
+  normalize_whitespace: true
+
+tokenization:
+  # Campos concatenados com o sep_token nativo de cada tokenizador
+  fields: ["title", "description", "input_format"]
+  # Estratégias suportadas: "right", "head_tail", "reserve_input_format"
+  truncation_strategy: "reserve_input_format"
+  reserve_input_format_tokens: 128
+  head_tail_head_tokens: 128
+
+model:
+  dropout: 0.1
+  # Modos: "mtl", "tags_only", "difficulty_only"
+  task_mode: "mtl"
+  # Cabeça de dificuldade: "classification" (CrossEntropy) ou "coral" (ordinal)
+  difficulty_head_type: "classification"
+  use_pos_weight: false
+
+training:
+  effective_batch_size: 32
+  max_epochs: 20
+  early_stopping_patience: 3
+  learning_rate: 2.0e-5
+  weight_decay: 0.01
+  # Divergência registrada na Tabela 3 / README: warmup linear de 10%
+  warmup_ratio: 0.1
+  max_grad_norm: 1.0
+  alpha_tags: 1.0
+  beta_dif: 1.0
+  # "auto" seleciona bf16 se suportado pela GPU (ex.: L4), senão fp16 (ex.: T4), ou fp32 em CPU
+  mixed_precision: "auto"
+  keep_checkpoint: false
+  num_workers: 2
+
+evaluation:
+  tag_threshold: 0.5
+  # Ajuste de limiar por classe exclusivamente no conjunto de validação (desligado por padrão)
+  tune_thresholds_on_val: false
+  threshold_grid_step: 0.05
+
+stats:
+  alpha: 0.05
+  bootstrap_resamples: 10000
+  bootstrap_seed: 42
+  planned_contrasts:
+    - name: "RoBERTa vs CodeBERT (512)"
+      model_a: "roberta-base_len512"
+      model_b: "codebert-base_len512"
+    - name: "BERT vs RoBERTa (512)"
+      model_a: "bert-base-uncased_len512"
+      model_b: "roberta-base_len512"
+    - name: "ModernBERT 512 vs 2048"
+      model_a: "modernbert-base_len512"
+      model_b: "modernbert-base_len2048"
+    - name: "BigBird 512 vs 2048"
+      model_a: "bigbird-roberta-base_len512"
+      model_b: "bigbird-roberta-base_len2048"

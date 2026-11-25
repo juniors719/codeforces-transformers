@@ -1,0 +1,18 @@
+# Ablação opcional (Fase 2): Single-Task Learning (tags_only e difficulty_only) vs MTL
+experiment:
+  name: "ablation_stl"
+  description: "Comparação single-task vs multi-task para RoBERTa e CodeBERT (desligada por padrão)."
+  enabled: false
+  runs:
+    - model: "roberta-base"
+      max_lengths: [512]
+      task_mode: "tags_only"
+    - model: "roberta-base"
+      max_lengths: [512]
+      task_mode: "difficulty_only"
+    - model: "codebert-base"
+      max_lengths: [512]
+      task_mode: "tags_only"
+    - model: "codebert-base"
+      max_lengths: [512]
+      task_mode: "difficulty_only"

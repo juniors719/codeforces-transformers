@@ -1,0 +1,13 @@
+# Ablação opcional (Fase 2): cabeça ordinal CORAL para dificuldade
+experiment:
+  name: "ablation_coral"
+  description: "Comparação da cabeça ordinal CORAL contra CrossEntropy padrão (desligada por padrão)."
+  enabled: false
+  runs:
+    - model: "roberta-base"
+      max_lengths: [512]
+    - model: "codebert-base"
+      max_lengths: [512]
+
+model:
+  difficulty_head_type: "coral"

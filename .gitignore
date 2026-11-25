@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.venv/
+venv/
+
+# Jupyter / Colab
+.ipynb_checkpoints/
+
+# Dados em cache e checkpoints temporários pesados
+results/cache/
+results/runs/**/best_checkpoint.pt
+results/runs/**/last_state.pt
+*.zip
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db

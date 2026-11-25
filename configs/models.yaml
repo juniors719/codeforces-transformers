@@ -1,0 +1,77 @@
+# Catálogo de modelos Hugging Face.
+# Adicione ou remova entradas aqui sem precisar alterar o código-fonte.
+models:
+  bert-base-uncased:
+    hf_name: "bert-base-uncased"
+    display_name: "BERT-base"
+    max_lengths: [512]
+    learning_rate: 2.0e-5
+    per_device_batch_size:
+      512: 16
+    gradient_checkpointing:
+      512: false
+    notes: "Baseline clássico de 512 tokens (uncased)."
+
+  roberta-base:
+    hf_name: "roberta-base"
+    display_name: "RoBERTa-base"
+    max_lengths: [512]
+    learning_rate: 2.0e-5
+    per_device_batch_size:
+      512: 16
+    gradient_checkpointing:
+      512: false
+    notes: "Pré-treino otimizado em texto geral (512 tokens, BPE)."
+
+  codebert-base:
+    hf_name: "microsoft/codebert-base"
+    display_name: "CodeBERT-base"
+    max_lengths: [512]
+    learning_rate: 2.0e-5
+    per_device_batch_size:
+      512: 16
+    gradient_checkpointing:
+      512: false
+    notes: "Mesma arquitetura do RoBERTa-base, pré-treinado em código e linguagem natural."
+
+  modernbert-base:
+    hf_name: "answerdotai/ModernBERT-base"
+    display_name: "ModernBERT-base"
+    max_lengths: [512, 2048]
+    learning_rate: 2.0e-5
+    per_device_batch_size:
+      512: 16
+      2048: 4
+    gradient_checkpointing:
+      512: false
+      2048: true
+    extra_model_kwargs:
+      reference_compile: false
+    notes: "Encoder moderno com suporte a contexto longo (até 8192). Exige transformers >= 4.48."
+
+  bigbird-roberta-base:
+    hf_name: "google/bigbird-roberta-base"
+    display_name: "BigBird-RoBERTa"
+    max_lengths: [512, 2048]
+    learning_rate: 2.0e-5
+    per_device_batch_size:
+      512: 16
+      2048: 4
+    gradient_checkpointing:
+      512: false
+      2048: true
+    attention_type_by_length:
+      512: "original_full"
+      2048: "block_sparse"
+    notes: "Com max_len=512, o BigBird no HF usa attention_type='original_full' por ficar abaixo do limiar de atenção esparsa por blocos."
+
+  bert-tiny:
+    hf_name: "prajjwal1/bert-tiny"
+    display_name: "BERT-tiny (dry-run)"
+    max_lengths: [128]
+    learning_rate: 5.0e-5
+    per_device_batch_size:
+      128: 8
+    gradient_checkpointing:
+      128: false
+    notes: "Modelo mínimo usado exclusivamente para dry-run rápido em CPU."

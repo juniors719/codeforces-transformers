@@ -1,0 +1,23 @@
+# Dry-run rápido em CPU para validar o pipeline ponta a ponta em poucos minutos
+experiment:
+  name: "dry_run"
+  description: "Validação ponta a ponta com subset minúsculo, 1 época, 1 seed e bert-tiny."
+  max_train_samples: 64
+  max_val_samples: 32
+  max_test_samples: 32
+  runs:
+    - model: "bert-tiny"
+      max_lengths: [128]
+
+project:
+  seeds: [42]
+
+labels:
+  min_tag_freq: 2
+
+training:
+  effective_batch_size: 8
+  max_epochs: 1
+  early_stopping_patience: 1
+  mixed_precision: "fp32"
+  num_workers: 0
