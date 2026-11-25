@@ -12,6 +12,6 @@ pyarrow==19.0.0
 matplotlib==3.10.0
 PyYAML==6.0.2
 tqdm==4.67.1
-sentencepiece==0.2.0
+sentencepiece>=0.2.0,<0.3.0
 protobuf==5.29.3
 pytest==8.3.4
