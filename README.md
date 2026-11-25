@@ -29,6 +29,8 @@ tcc2-transformers/
 
 ## 3. Como executar no Google Colab
 
+> **Recomendado (sessão única)**: use [notebooks/tcc2_colab_all_in_one.ipynb](notebooks/tcc2_colab_all_in_one.ipynb) para rodar Setup, EDA, Smoke Test, Treino e Análise Estatística na **mesma sessão de GPU**, evitando perder a máquina ao trocar de notebook. Os notebooks separados (`00_setup_colab` a `03_analysis`) continuam disponíveis para uso modular.
+
 ### Caminho A — Notebook local conectado a um runtime do Colab (extensão da IDE)
 1. Abra a pasta `tcc2-transformers` como workspace ativo na sua IDE.
 2. Conecte o kernel do notebook a um runtime GPU do Colab (T4 ou L4) pela extensão do Colab da IDE.
