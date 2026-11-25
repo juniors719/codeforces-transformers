@@ -133,12 +133,19 @@ def run_experiment_grid(
 
         dif = payload["metrics"]["difficulty"]
         tags = payload["metrics"]["tags"]
+        tags_tuned = payload["metrics"].get("tags_tuned_val")
         trunc_tr = payload["truncation_stats"]["train"]
+        tuned_str = (
+            f" | Tags(val-thr) F1-micro={tags_tuned['f1_micro']:.4f}, F1-macro={tags_tuned['f1_macro']:.4f}"
+            if tags_tuned
+            else ""
+        )
         print(
             f"[OK] {item['run_id']} concluído em {_format_duration(dt)} | "
             f"val_loss={payload['best_val_loss']:.4f} (época {payload['best_epoch']}) | "
             f"Teste: Dif Acc={dif['accuracy']:.4f}, QWK={dif['qwk']:.4f}, "
-            f"Tags F1-micro={tags['f1_micro']:.4f}, F1-macro={tags['f1_macro']:.4f} | "
+            f"Tags(0.5) F1-micro={tags['f1_micro']:.4f}, F1-macro={tags['f1_macro']:.4f}"
+            f"{tuned_str} | "
             f"Truncados treino: {trunc_tr['n_truncated']}/{trunc_tr['total']} ({trunc_tr['pct']}%)"
         )
         if remaining > 0:

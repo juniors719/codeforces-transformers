@@ -69,7 +69,8 @@ training:
   # Divergência registrada na Tabela 3 / README: warmup linear de 10%
   warmup_ratio: 0.1
   max_grad_norm: 1.0
-  alpha_tags: 1.0
+  # Equaliza a escala entre BCE multirrótulo (~0.28) e CrossEntropy 5 classes (~1.35)
+  alpha_tags: 5.0
   beta_dif: 1.0
   # "auto" seleciona bf16 se suportado pela GPU (ex.: L4), senão fp16 (ex.: T4), ou fp32 em CPU
   mixed_precision: "auto"
@@ -78,8 +79,8 @@ training:
 
 evaluation:
   tag_threshold: 0.5
-  # Ajuste de limiar por classe exclusivamente no conjunto de validação (desligado por padrão)
-  tune_thresholds_on_val: false
+  # Ajuste de limiar por classe exclusivamente no conjunto de validação (reportado junto com limiar 0.5)
+  tune_thresholds_on_val: true
   threshold_grid_step: 0.05
 
 stats:
