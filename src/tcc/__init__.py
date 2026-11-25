@@ -3,8 +3,10 @@
 import os
 
 # Evita que transformers tente importar TensorFlow pré-instalado no Colab (conflito de protobuf)
+# e evita warnings de fork do tokenizers no DataLoader.
 os.environ.setdefault("USE_TF", "0")
 os.environ.setdefault("TRANSFORMERS_NO_TF", "1")
 os.environ.setdefault("USE_TORCH", "1")
+os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 
 __version__ = "0.1.0"

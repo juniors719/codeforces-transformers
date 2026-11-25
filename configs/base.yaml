@@ -74,7 +74,7 @@ training:
   # "auto" seleciona bf16 se suportado pela GPU (ex.: L4), senão fp16 (ex.: T4), ou fp32 em CPU
   mixed_precision: "auto"
   keep_checkpoint: false
-  num_workers: 2
+  num_workers: 0
 
 evaluation:
   tag_threshold: 0.5

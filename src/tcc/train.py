@@ -284,7 +284,7 @@ def run_single_experiment(
     )
     val_loader = DataLoader(
         val_ds,
-        batch_size=per_device_bs * 2,
+        batch_size=per_device_bs,
         shuffle=False,
         collate_fn=collate_fn,
         num_workers=num_workers,
@@ -292,7 +292,7 @@ def run_single_experiment(
     )
     test_loader = DataLoader(
         test_ds,
-        batch_size=per_device_bs * 2,
+        batch_size=per_device_bs,
         shuffle=False,
         collate_fn=collate_fn,
         num_workers=num_workers,
@@ -408,6 +408,14 @@ def run_single_experiment(
                 "val_dif_qwk": val_metrics["difficulty"]["qwk"],
                 "epoch_seconds": round(ep_time, 2),
             }
+        )
+
+        print(
+            f"  [{run_dir.name}] Época {epoch}/{max_epochs} | "
+            f"train_loss={train_loss:.4f} | val_loss={val_loss:.4f} | "
+            f"val_qwk={val_metrics['difficulty']['qwk']:.4f} | "
+            f"val_f1_micro={val_metrics['tags']['f1_micro']:.4f} | {ep_time:.1f}s",
+            flush=True,
         )
 
         if val_loss < best_val_loss:
