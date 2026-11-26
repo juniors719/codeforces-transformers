@@ -308,7 +308,10 @@ def run_single_experiment(
     if device.type == "cuda":
         total_vram_gb = torch.cuda.get_device_properties(device).total_memory / (1024**3)
         if total_vram_gb < 18.0:
-            vram_cap = 16 if max_length <= 512 else 4
+            if "bigbird" in model_key:
+                vram_cap = 8 if max_length <= 512 else 2
+            else:
+                vram_cap = 16 if max_length <= 512 else 4
             per_device_bs = min(per_device_bs, vram_cap)
     per_device_bs = min(per_device_bs, eff_bs)
     grad_accum = max(1, math.ceil(eff_bs / per_device_bs))
