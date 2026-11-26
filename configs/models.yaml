@@ -55,8 +55,8 @@ models:
     max_lengths: [512, 2048]
     learning_rate: 2.0e-5
     per_device_batch_size:
-      512: 32
-      2048: 16
+      512: 16
+      2048: 4
     gradient_checkpointing:
       512: false
       2048: true

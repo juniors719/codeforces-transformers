@@ -298,10 +298,18 @@ def run_single_experiment(
         "test": {"n_truncated": test_ds.n_truncated, "total": len(test_ds), "pct": round(test_ds.pct_truncated, 2)},
     }
 
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
     # Batch size por dispositivo e gradient accumulation para atingir batch efetivo configurado
     eff_bs = int(train_cfg.get("effective_batch_size", 32))
     per_dev_map = model_spec.get("per_device_batch_size", {}) or {}
     per_device_bs = int(per_dev_map.get(max_length, per_dev_map.get(str(max_length), 8)))
+    # Proteção automática contra OOM quando o Colab aloca uma GPU de <= 18 GB (ex.: T4 15 GB)
+    if device.type == "cuda":
+        total_vram_gb = torch.cuda.get_device_properties(device).total_memory / (1024**3)
+        if total_vram_gb < 18.0:
+            vram_cap = 16 if max_length <= 512 else 4
+            per_device_bs = min(per_device_bs, vram_cap)
     per_device_bs = min(per_device_bs, eff_bs)
     grad_accum = max(1, math.ceil(eff_bs / per_device_bs))
 
@@ -334,7 +342,6 @@ def run_single_experiment(
         pin_memory=torch.cuda.is_available(),
     )
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     amp_mode, amp_dtype, use_scaler = resolve_amp_config(train_cfg.get("mixed_precision", "auto"), device)
     use_amp = amp_dtype is not None and device.type == "cuda"
 
